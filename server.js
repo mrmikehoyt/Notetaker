@@ -4,7 +4,8 @@ const express = require("express");
 const path = require("path");
 // need fs to read and write to files
 const fs = require("fs");
-
+const {v4:uuid} = require("uuid")
+//import { v1 as uuidv1 } from 'uuid';
 // creating an "express" server
 const app = express();
 // Sets an Initial port for listeners
@@ -16,25 +17,50 @@ app.use(express.static(path.join(__dirname, "./public")));
 // routes
 
 // api call response for all the notes, and sends the results to the browser as an array of object
-
-app.get("/api/notes", function(err, res) {
+const characters = [
+    {
+      routeName: 'yoda',
+      name: 'Yoda',
+      role: 'Jedi Master',
+      age: 900,
+      forcePoints: 2000
+    },
+    {
+      routeName: 'darth-maul',
+      name: 'Darth Maul',
+      role: 'Sith Lord',
+      age: 200,
+      forcePoints: 1200
+    },
+    {
+      routeName: 'obiwan-kenobi',
+      name: 'Obi Wan Kenobi',
+      role: 'Jedi Master',
+      age: 55,
+      forcePoints: 1350
+    }
+  ]
+ 
+app.get("/api/notes", function(req, res) {
    // apiGetNotes  = fs.readFile('./db/db.json', function(err,res){
     fs.readFile('./db/db.json', 'utf8', (err, jsonString) => {
         if (err) {
-            console.error(err)
-            return
+            //console.error(err)
+            return 
           }
          
             try {
                 const customer = JSON.parse(jsonString)
                 console.log(customer.title) // => "prints title field to console"
                 console.log(customer.text)  // => "prints text field to console"
-                return customer.title
+                          res.json(customer)  
             } catch(err) {
                 console.log('Error parsing JSON text:', err)
                 
     }
             })
+            
+
             
     })
 
@@ -43,15 +69,26 @@ app.get("/api/notes", function(err, res) {
 //})
 
 app.post("/api/notes", function(req, res) {
+    
     const reqBodyNote = req.body
-    const savedNoteArray = []
-    const savedNote = JSON.stringify(reqBodyNote)
-    fs.writeFile('./db/db.json', savedNote, err => {
+    reqBodyNote.id=uuid()
+const savedNote = JSON.stringify(reqBodyNote)
+    
+    fs.readFile('./db/db.json', 'utf8', (err, jsonString) => {
         if (err) {
             console.log('Error writing file', err)
         } else {
-            console.log('Successfully wrote file')
-            return savedNote
+            let allnotes = JSON.parse(jsonString)
+            console.log('Successfully updated html page')
+            allnotes.push(reqBodyNote)
+            
+            //JSON.stringify(allnotes)
+            fs.writeFile('./db/db.json', JSON.stringify(allnotes), (err) => {
+                if (err) {
+                    console.log('Error writing file', err)
+                } 
+            //return savedNotes
+            })
         }
     })
 
